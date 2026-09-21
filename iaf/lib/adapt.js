@@ -32,6 +32,31 @@ function classifyExisting(projectRoot) {
   return { ...info, dirtyFiles };
 }
 
+function installerOutput(result) {
+  return `${result && result.stderr ? result.stderr : ''}\n${result && result.stdout ? result.stdout : ''}`;
+}
+
+function isInstallStateTargetMismatch(result) {
+  return /install-state target does not match the current plan/.test(installerOutput(result));
+}
+
+function adapterStatePath(target) {
+  const map = {
+    cursor: '.cursor/ecc-install-state.json',
+    'claude-project': '.claude/ecc-install-state.json',
+    gemini: '.gemini/ecc-install-state.json',
+    antigravity: '.agents/ecc-install-state.json',
+    claude: null,
+    codex: null,
+  };
+  return map[target] || null;
+}
+
+function hasExistingAdapter(projectRoot, target) {
+  const relativePath = adapterStatePath(target);
+  return Boolean(relativePath && fs.existsSync(path.join(projectRoot, relativePath)));
+}
+
 function shouldSkipHooks(projectRoot, hooksMode) {
   if (hooksMode === 'off') {
     return { skip: true, reason: 'requested off' };
@@ -76,6 +101,15 @@ function adaptRepo(options) {
   }
 
   for (const target of harnesses) {
+    if (options.overlayOnly) {
+      results.push({
+        target,
+        ok: true,
+        skippedOfficial: true,
+        reason: 'overlay-only',
+      });
+      continue;
+    }
     const installed = officialInstall({
       target,
       projectRoot,
@@ -83,6 +117,16 @@ function adaptRepo(options) {
       dryRun: false,
       hooks: target === 'cursor' && !hookDecision.skip,
     });
+    if (!installed.ok && isInstallStateTargetMismatch(installed) && hasExistingAdapter(projectRoot, target)) {
+      results.push({
+        ...installed,
+        ok: true,
+        skippedOfficial: true,
+        reason: 'install-state-target-mismatch',
+        overlayOnly: true,
+      });
+      continue;
+    }
     results.push(installed);
     if (!installed.ok) {
       return {
@@ -121,6 +165,7 @@ function adaptRepo(options) {
     hooks: hookDecision,
     results,
     overlay,
+    overlayOnly: Boolean(options.overlayOnly || results.some(item => item.overlayOnly || item.skippedOfficial)),
     provenancePath: path.join(projectRoot, '.iaf-ecc-state.json'),
     projectContext,
     preserved: [...PRESERVE_NAMES].filter(name => fs.existsSync(path.join(projectRoot, name))),
@@ -141,4 +186,6 @@ module.exports = {
   bootstrapRepo,
   updateRepo,
   shouldSkipHooks,
+  isInstallStateTargetMismatch,
+  hasExistingAdapter,
 };

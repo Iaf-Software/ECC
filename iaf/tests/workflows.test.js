@@ -63,6 +63,31 @@ describe('overlay and workflows', () => {
     fs.rmSync(inventoryDir, { recursive: true, force: true });
   });
 
+  it('skips official reinstall on install-state target mismatch when adapters exist', () => {
+    const { isInstallStateTargetMismatch } = require('../lib/adapt');
+    assert.equal(isInstallStateTargetMismatch({
+      stderr: 'Error: Refusing install: install-state target does not match the current plan at /tmp/fixture/.cursor/ecc-install-state.json.',
+    }), true);
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'iaf-overlay-only-'));
+    spawnSync('git', ['init'], { cwd: root });
+    git(root, ['config', 'user.email', 'test@example.com']);
+    git(root, ['config', 'user.name', 'test']);
+    fs.writeFileSync(path.join(root, 'README.md'), 'fixture\n');
+    git(root, ['add', 'README.md']);
+    git(root, ['commit', '-m', 'init']);
+    const result = adaptRepo({
+      repo: root,
+      dryRun: false,
+      harnesses: ['cursor'],
+      overlayOnly: true,
+      allowDirty: true,
+    });
+    assert.equal(result.ok, true);
+    assert.equal(result.overlayOnly, true);
+    assert.equal(fs.existsSync(path.join(root, '.cursor', 'rules', 'iaf-autonomous-orchestration.mdc')), true);
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+
   it('upstream overlap detector treats iaf/ as IAF-owned', () => {
     const overlap = detectIafOverlap('HEAD', 'HEAD');
     assert.equal(overlap.safe, true);

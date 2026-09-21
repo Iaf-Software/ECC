@@ -55,8 +55,8 @@ function parseArgs(argv) {
       options.json = true;
     } else if (arg === '--dry-run') {
       options.dryRun = true;
-    } else if (arg === '--apply') {
-      options.apply = true;
+    } else if (arg === '--overlay-only') {
+      options.overlayOnly = true;
     } else if (arg === '--repo' || arg === '--harness' || arg === '--harnesses' || arg === '--hooks' || arg === '--profile' || arg === '--inventory') {
       const key = arg === '--inventory' ? 'inventoryPath' : arg.slice(2).replace('harnesses', 'harness');
       options[key] = args.shift();
@@ -122,6 +122,7 @@ function main(argv = process.argv.slice(2)) {
         harnesses: parseHarnesses(options.harness),
         hooks: options.hooks,
         profile: options.profile,
+        overlayOnly: Boolean(options.overlayOnly),
       }));
       return 0;
     case 'adapt':
@@ -131,6 +132,7 @@ function main(argv = process.argv.slice(2)) {
         harnesses: parseHarnesses(options.harness),
         hooks: options.hooks,
         profile: options.profile,
+        overlayOnly: Boolean(options.overlayOnly),
         allowDirty: true,
       }));
       return 0;
@@ -141,6 +143,7 @@ function main(argv = process.argv.slice(2)) {
         harnesses: parseHarnesses(options.harness),
         hooks: options.hooks,
         profile: options.profile,
+        overlayOnly: Boolean(options.overlayOnly),
       }));
       return 0;
     case 'inventory':
