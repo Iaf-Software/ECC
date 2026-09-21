@@ -42,19 +42,18 @@ function isInstallStateTargetMismatch(result) {
 
 function adapterStatePath(target) {
   const map = {
-    cursor: '.cursor/ecc-install-state.json',
-    'claude-project': '.claude/ecc-install-state.json',
-    gemini: '.gemini/ecc-install-state.json',
-    antigravity: '.agents/ecc-install-state.json',
-    claude: null,
-    codex: null,
+    cursor: ['.cursor/ecc-install-state.json'],
+    'claude-project': ['.claude/ecc-install-state.json', '.claude/ecc/install-state.json'],
+    gemini: ['.gemini/ecc-install-state.json'],
+    antigravity: ['.agents/ecc-install-state.json'],
+    claude: [],
+    codex: [],
   };
-  return map[target] || null;
+  return map[target] || [];
 }
 
 function hasExistingAdapter(projectRoot, target) {
-  const relativePath = adapterStatePath(target);
-  return Boolean(relativePath && fs.existsSync(path.join(projectRoot, relativePath)));
+  return adapterStatePath(target).some(relativePath => fs.existsSync(path.join(projectRoot, relativePath)));
 }
 
 function shouldSkipHooks(projectRoot, hooksMode) {
@@ -117,13 +116,14 @@ function adaptRepo(options) {
       dryRun: false,
       hooks: target === 'cursor' && !hookDecision.skip,
     });
-    if (!installed.ok && isInstallStateTargetMismatch(installed) && hasExistingAdapter(projectRoot, target)) {
+    if (!installed.ok && isInstallStateTargetMismatch(installed)) {
       results.push({
         ...installed,
         ok: true,
         skippedOfficial: true,
         reason: 'install-state-target-mismatch',
         overlayOnly: true,
+        adapterPresent: hasExistingAdapter(projectRoot, target),
       });
       continue;
     }
