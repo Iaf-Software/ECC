@@ -22,7 +22,8 @@ node iaf/bin/iaf-ecc fleet-status --json
 node iaf/bin/iaf-ecc bootstrap --repo /path/to/repo --dry-run
 node iaf/bin/iaf-ecc adapt --repo /path/to/repo --dry-run
 node iaf/bin/iaf-ecc update --repo /path/to/repo --dry-run
-node iaf/bin/iaf-ecc fleet-update --repo optibuild --dry-run
+node iaf/bin/iaf-ecc fleet-update --repo /path/to/checkout --dry-run
+node iaf/bin/iaf-ecc fleet-status --inventory iaf/operator/fleet.inventory.json --json
 node iaf/bin/iaf-ecc upstream-preview
 node iaf/bin/iaf-ecc smoke-model --json
 ```

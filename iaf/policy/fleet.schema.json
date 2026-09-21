@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "IAF fleet inventory",
+  "type": "object",
+  "required": ["projects"],
+  "properties": {
+    "classification": { "const": "IAF_FLEET_DATA" },
+    "version": { "type": "integer" },
+    "projects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "github": { "type": "string" },
+          "canonicalBranch": { "type": "string" },
+          "liveExpected": { "enum": ["yes", "no", "maybe", "unknown"] },
+          "pathHints": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}

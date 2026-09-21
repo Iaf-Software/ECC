@@ -5,7 +5,7 @@
   "collisionStopsHookActivationOnly": true,
   "cursorHookPathBug": {
     "classification": "ADAPTER_BUG",
-    "stillPresentIn": "2.2.2",
+    "observedInOfficialCursorAdapter": true,
     "upstreamIssue": "Generated Cursor hook wrappers live in .cursor/hooks and require('../../scripts/...'), which resolves to <repo>/scripts rather than .cursor/scripts where hooks-runtime copies files.",
     "iafFix": "Rewrite generated copies only: require('../../scripts/') -> require('../scripts/'); adapter getPluginRoot() from repo root to .cursor root.",
     "doNot": "Do not add project-root scripts/hooks and scripts/lib symlinks unless a repository already owns those paths and rewriting is unsafe."

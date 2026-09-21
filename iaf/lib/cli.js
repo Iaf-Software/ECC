@@ -25,11 +25,11 @@ Usage:
 Commands:
   version
   help
-  fleet-status [--json]
-  fleet-update --repo <id> [--dry-run]
-  bootstrap --repo <path> [--harness cursor,gemini,...] [--dry-run] [--hooks auto|on|off]
-  adapt --repo <path> [--dry-run] [--hooks auto|on|off]
-  update --repo <path> [--dry-run]
+  fleet-status [--json] [--inventory <path>] [--scan-root <path>]
+  fleet-update --repo <id-or-path> [--inventory <path>] [--dry-run|--apply]
+  bootstrap --repo <path> [--harness cursor,gemini,...] [--dry-run|--apply] [--hooks auto|on|off]
+  adapt --repo <path> [--dry-run|--apply] [--hooks auto|on|off]
+  update --repo <path> [--dry-run|--apply]
   inventory --repo <path>
   upstream-preview
   upstream-apply --dry-run|--apply
@@ -57,8 +57,12 @@ function parseArgs(argv) {
       options.dryRun = true;
     } else if (arg === '--apply') {
       options.apply = true;
-    } else if (arg === '--repo' || arg === '--harness' || arg === '--harnesses' || arg === '--hooks' || arg === '--profile') {
-      options[arg.slice(2).replace('harnesses', 'harness')] = args.shift();
+    } else if (arg === '--repo' || arg === '--harness' || arg === '--harnesses' || arg === '--hooks' || arg === '--profile' || arg === '--inventory') {
+      const key = arg === '--inventory' ? 'inventoryPath' : arg.slice(2).replace('harnesses', 'harness');
+      options[key] = args.shift();
+    } else if (arg === '--scan-root') {
+      options.scanRoots = options.scanRoots || [];
+      options.scanRoots.push(args.shift());
     } else if (arg.startsWith('--')) {
       throw new Error(`Unknown option: ${arg}`);
     } else {
@@ -87,7 +91,10 @@ function main(argv = process.argv.slice(2)) {
       printJson({ iaf: iafVersion(), ecc: packageVersion() });
       return 0;
     case 'fleet-status': {
-      const rows = fleetStatus();
+      const rows = fleetStatus({
+        inventoryPath: options.inventoryPath,
+        scanRoots: options.scanRoots,
+      });
       if (options.json) {
         printJson(rows);
       } else {
@@ -101,7 +108,12 @@ function main(argv = process.argv.slice(2)) {
       if (!options.repo) {
         throw new Error('fleet-update requires --repo <id>');
       }
-      printJson(fleetUpdate({ repo: options.repo, dryRun: !options.apply, apply: Boolean(options.apply) }));
+      printJson(fleetUpdate({
+        repo: options.repo,
+        inventoryPath: options.inventoryPath,
+        dryRun: !options.apply,
+        apply: Boolean(options.apply),
+      }));
       return 0;
     case 'bootstrap':
       printJson(bootstrapRepo({

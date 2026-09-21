@@ -1,6 +1,6 @@
 # Harness matrix
 
-Values are official ECC 2.2.2 + IAF overlay. "Same as Claude" is never implied.
+Values are the currently installed official ECC package plus the IAF overlay. "Same as Claude" is never implied.
 
 | Capability | Claude Code | Cursor | Codex | Gemini | Antigravity |
 | --- | --- | --- | --- | --- | --- |
@@ -9,7 +9,7 @@ Values are official ECC 2.2.2 + IAF overlay. "Same as Claude" is never implied.
 | Skills | Official plugin/project skills | Copied into `.cursor/skills` | Plugin catalog | Instruction surface, not Claude skill runtime | `.agents/skills` |
 | Automatic skill discovery | Native | Native Cursor skills + IAF rule | Native if plugin present | Instruction-following only | Adapter-dependent |
 | Agents/subagents | Native ECC agents | `.cursor/agents` via Task | Not Claude-equivalent | Not Claude-equivalent | Adapter agents |
-| Automatic delegation | Native | Parent Agent → Task (verified by OmniPOS reference) | NOT_OBSERVABLE without Codex CLI | NOT_SUPPORTED as Claude Task | NOT_OBSERVABLE here |
+| Automatic delegation | Native | Parent Agent → Task (verified by a Cursor reference test; see `docs/reference/`) | NOT_OBSERVABLE without Codex CLI | NOT_SUPPORTED as Claude Task | NOT_OBSERVABLE here |
 | Independent review | Native reviewers | Task specialists | Limited by harness | In-session only | Limited by harness |
 | Preferred model semantics | Upstream aliases work | Claude aliases map to Other Models | Must stay on Codex models | Must stay on Gemini models | Backend-selected |
 | Model availability discovery | Upstream | Session/account; IAF does not scrape billing | Codex-native | Gemini-native | Backend |

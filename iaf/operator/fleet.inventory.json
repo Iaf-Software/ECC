@@ -1,7 +1,9 @@
 {
+  "classification": "IAF_FLEET_DATA",
   "version": 1,
-  "owner": "IAF",
-  "notes": "Path hints are environment-specific discovery aids, not a requirement that every host contain every checkout. Do not invent missing checkouts or deploys.",
+  "owner": "operator",
+  "notGenericCore": true,
+  "notes": "OPERATOR/FLEET DATA — not IAF generic core. Path hints are environment-specific discovery aids. Do not invent missing checkouts or deploys. Adding a repository means adding an entry here or passing --repo /path, not editing iaf/lib.",
   "projects": [
     {
       "id": "wip",

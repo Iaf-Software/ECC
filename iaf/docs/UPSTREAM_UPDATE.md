@@ -40,4 +40,4 @@ Then:
 
 ## Pin vs latest
 
-Current IAF feature branch is based on ECC 2.2.2 `934195f`. Official `upstream/main` can be ahead while still reporting version 2.2.2. Do not roll that merge into every application repository automatically. Use `iaf-ecc update --repo` one project at a time after the fork merge is verified.
+Observed provenance belongs in install metadata, not in update conditionals. `upstream-preview` discovers local HEAD vs `upstream/main` at runtime. Do not roll an upstream merge into every application repository automatically. Use `iaf-ecc update --repo /path` one project at a time after the fork merge is verified.

@@ -48,12 +48,19 @@ describe('overlay and workflows', () => {
     fs.rmSync(root, { recursive: true, force: true });
   });
 
-  it('fleet status is read-only and serial update refuses --all', () => {
-    const rows = fleetStatus();
+  it('fleet status uses supplied inventory and serial update refuses --all', () => {
+    const inventoryDir = fs.mkdtempSync(path.join(os.tmpdir(), 'iaf-inv-'));
+    const inventoryPath = path.join(inventoryDir, 'fleet.inventory.json');
+    fs.writeFileSync(inventoryPath, JSON.stringify({
+      classification: 'IAF_FLEET_DATA',
+      projects: [{ id: 'fixture-alpha', pathHints: [inventoryDir], liveExpected: 'no' }],
+    }));
+    const rows = fleetStatus({ inventoryPath });
     assert.ok(Array.isArray(rows));
-    assert.ok(rows.some(row => row.PROJECT === 'optibuild'));
+    assert.ok(rows.some(row => row.PROJECT === 'fixture-alpha'));
     const { fleetUpdate } = require('../lib/fleet');
     assert.throws(() => fleetUpdate({ all: true }), /concurrent fleet mutation/);
+    fs.rmSync(inventoryDir, { recursive: true, force: true });
   });
 
   it('upstream overlap detector treats iaf/ as IAF-owned', () => {

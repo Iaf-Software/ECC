@@ -38,6 +38,7 @@ function buildProvenance(options = {}) {
     modelRoutingPolicy: 'iaf/policy/model-routing.json',
     fallbackPolicy: 'preferred-if-usable-else-harness-native',
     mcpOptional: 'off',
+    projectContext: options.projectContext || null,
     project: {
       path: projectRoot || null,
       origin: repo ? repo.origin : null,

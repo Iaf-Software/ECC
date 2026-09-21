@@ -33,7 +33,7 @@ Re-runs official installers for selected targets, reapplies the IAF overlay, ref
 
 ```bash
 node iaf/bin/iaf-ecc fleet-status --json
-node iaf/bin/iaf-ecc fleet-update --repo optibuild
+node iaf/bin/iaf-ecc fleet-update --repo /path/to/checkout
 ```
 
 `fleet-status` is read-only. `fleet-update` mutates one id at a time and refuses `--all`.

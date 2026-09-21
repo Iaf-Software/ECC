@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "ecc": "2.2.2",
-  "iaf": "0.1.0",
+  "iaf": "discovered-from-iaf/VERSION",
+  "ecc": "discovered-from-package.json-at-runtime",
   "capabilities": {
     "projectInstructions": {
       "claude": "official",

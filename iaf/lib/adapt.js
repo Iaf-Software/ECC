@@ -12,6 +12,7 @@ const {
   detectHookCollision,
 } = require('./overlay');
 const { buildProvenance, writeProvenance } = require('./provenance');
+const { discoverProjectContext } = require('./project-context');
 
 const PRESERVE_NAMES = new Set([
   'AGENTS.md',
@@ -68,6 +69,7 @@ function adaptRepo(options) {
       harnesses,
       hooks: hookDecision,
       preserve: [...PRESERVE_NAMES],
+      projectContext: discoverProjectContext(projectRoot),
       wouldInstallOfficial: harnesses,
       wouldApplyIafOverlay: true,
     };
@@ -102,11 +104,13 @@ function adaptRepo(options) {
       : [],
   };
 
+  const projectContext = discoverProjectContext(projectRoot);
   const provenance = buildProvenance({
     projectRoot,
     harnesses,
     profile,
     hooksEnabled: !hookDecision.skip,
+    projectContext,
   });
   writeProvenance(projectRoot, provenance);
 
@@ -118,6 +122,7 @@ function adaptRepo(options) {
     results,
     overlay,
     provenancePath: path.join(projectRoot, '.iaf-ecc-state.json'),
+    projectContext,
     preserved: [...PRESERVE_NAMES].filter(name => fs.existsSync(path.join(projectRoot, name))),
   };
 }

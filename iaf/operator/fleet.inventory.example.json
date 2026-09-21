@@ -1,0 +1,21 @@
+{
+  "classification": "IAF_FLEET_DATA",
+  "version": 1,
+  "notes": "Example operator inventory. Copy and replace with your repositories. Generic IAF core does not embed these names.",
+  "projects": [
+    {
+      "id": "fixture-alpha",
+      "github": "example/fixture-alpha",
+      "canonicalBranch": "main",
+      "liveExpected": "no",
+      "pathHints": ["./fixtures/fixture-alpha"]
+    },
+    {
+      "id": "fixture-beta",
+      "github": "example/fixture-beta",
+      "canonicalBranch": "main",
+      "liveExpected": "no",
+      "pathHints": ["./fixtures/fixture-beta"]
+    }
+  ]
+}

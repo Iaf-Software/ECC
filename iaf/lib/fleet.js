@@ -2,11 +2,11 @@
 
 const fs = require('fs');
 const path = require('path');
-const { spawnSync } = require('child_process');
-const { loadPolicy } = require('./paths');
 const { inspectRepo, githubSlugFromRemote } = require('./identity');
 const { readInstallState } = require('./provenance');
 const { iafVersion } = require('./paths');
+const { loadInventory, scanGitRepositories } = require('./fleet-inventory');
+const { appearsLiveCheckout } = require('./host');
 
 function existingHint(hints) {
   for (const hint of hints || []) {
@@ -17,13 +17,8 @@ function existingHint(hints) {
   return null;
 }
 
-function doctorCursor(projectRoot) {
-  const state = readInstallState(projectRoot, '.cursor');
-  return state ? 'INSTALLED' : 'MISSING';
-}
-
 function statusOne(project) {
-  const foundPath = existingHint(project.pathHints);
+  const foundPath = project.path || existingHint(project.pathHints);
   const row = {
     PROJECT: project.id,
     PATH: foundPath || 'NOT_FOUND',
@@ -46,7 +41,8 @@ function statusOne(project) {
     DOCTOR: 'NOT_RUN',
     UPDATE_AVAILABLE: 'unknown',
     ACTION_REQUIRED: foundPath ? 'none' : 'checkout-not-found',
-    LIVE_EXPECTED: project.liveExpected,
+    LIVE_EXPECTED: project.liveExpected || 'unknown',
+    LIVE: foundPath ? appearsLiveCheckout(foundPath, project) : 'unknown',
   };
   if (!foundPath) {
     return row;
@@ -94,6 +90,9 @@ function statusOne(project) {
     const iafState = JSON.parse(fs.readFileSync(iafStatePath, 'utf8'));
     row.IAF_ECC_VERSION = iafState.iafExtensionVersion;
     row.IAF_ECC_SHA = iafState.iafForkCommit;
+    if (iafState.officialEccVersion && row.ECC_OFFICIAL_VERSION && iafState.officialEccVersion !== row.ECC_OFFICIAL_VERSION) {
+      row.UPDATE_AVAILABLE = 'maybe';
+    }
   } else {
     row.IAF_ECC_VERSION = 'not-adapted';
     row.ACTION_REQUIRED = 'adapt';
@@ -102,21 +101,56 @@ function statusOne(project) {
   return row;
 }
 
-function fleetStatus() {
-  const fleet = loadPolicy('fleet.json');
-  return fleet.projects.map(statusOne);
+function resolveFleetInventory(options = {}) {
+  if (Array.isArray(options.scanRoots) && options.scanRoots.length > 0) {
+    return scanGitRepositories(options.scanRoots, options);
+  }
+  return loadInventory(options);
+}
+
+function fleetStatus(options = {}) {
+  const inventory = resolveFleetInventory(options);
+  return inventory.projects.map(statusOne);
+}
+
+function isFilesystemRepo(value) {
+  if (!value) {
+    return false;
+  }
+  try {
+    const resolved = path.resolve(value);
+    return fs.existsSync(resolved) && fs.statSync(resolved).isDirectory();
+  } catch {
+    return false;
+  }
 }
 
 function fleetUpdate(options = {}) {
   if (options.all === true) {
-    const error = new Error('Refusing concurrent fleet mutation. Pass --repo <id> to update one repository.');
+    const error = new Error('Refusing concurrent fleet mutation. Pass --repo <id-or-path> to update one repository.');
     error.code = 'IAF_FLEET_SERIAL_REQUIRED';
     throw error;
   }
-  const fleet = loadPolicy('fleet.json');
-  const project = fleet.projects.find(item => item.id === options.repo);
+  if (!options.repo) {
+    const error = new Error('fleet-update requires --repo <id-or-path>');
+    error.code = 'IAF_UNKNOWN_REPO';
+    throw error;
+  }
+
+  const { updateRepo } = require('./adapt');
+  if (isFilesystemRepo(options.repo)) {
+    return updateRepo({
+      repo: path.resolve(options.repo),
+      dryRun: options.dryRun,
+      harnesses: options.harnesses,
+      hooks: options.hooks,
+    });
+  }
+
+  const inventory = resolveFleetInventory(options);
+  const project = inventory.projects.find(item => item.id === options.repo);
   if (!project) {
-    const error = new Error(`Unknown fleet repo: ${options.repo}`);
+    const error = new Error(`Unknown fleet repo id: ${options.repo}. Pass a filesystem path or add an inventory entry.`);
     error.code = 'IAF_UNKNOWN_REPO';
     throw error;
   }
@@ -124,7 +158,6 @@ function fleetUpdate(options = {}) {
   if (!foundPath) {
     return { ok: false, skipped: true, reason: 'checkout-not-found', project: project.id };
   }
-  const { updateRepo } = require('./adapt');
   return updateRepo({
     repo: foundPath,
     github: project.github,
@@ -134,20 +167,9 @@ function fleetUpdate(options = {}) {
   });
 }
 
-function parseLsRemote(github, branch) {
-  const result = spawnSync('git', ['ls-remote', '--heads', `https://github.com/${github}.git`, branch], {
-    encoding: 'utf8',
-  });
-  if (result.status !== 0) {
-    return null;
-  }
-  const line = (result.stdout || '').trim().split('\n')[0] || '';
-  return line.split(/[\s\t]/)[0] || null;
-}
-
 module.exports = {
   fleetStatus,
   fleetUpdate,
   statusOne,
-  parseLsRemote,
+  resolveFleetInventory,
 };
