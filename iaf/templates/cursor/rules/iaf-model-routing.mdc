@@ -1,0 +1,33 @@
+---
+description: IAF harness-aware model fallback for Cursor specialists. Role stays constant; model may change on availability failures only.
+alwaysApply: true
+iaf_owned: true
+---
+
+# IAF Cursor Model Routing
+
+Preferred model is a runtime preference, not the specialist identity.
+
+Pipeline:
+
+TASK → select ECC specialist → determine preferred model → if usable, execute → else select the best currently available Cursor-compatible fallback → retry the same specialist → record evidence.
+
+Default generated Cursor agents keep `IAF_UPSTREAM_PREFERRED_MODEL` in frontmatter
+and sidecar metadata. `model: inherit` is the Cursor **execution** policy when a
+Claude alias is not known to be usable. It does not delete the upstream preference.
+
+If a preferred Claude model later becomes usable in this account, IAF adapt with
+`cursorUsePreferredModels` can restore the executable `model:` field.
+
+When Task invocation fails for a MODEL_* availability reason, the parent Agent must
+retry the **same specialist** automatically. The user must not be asked to name
+Grok, Composer, or any fallback model.
+
+Bounded fallback:
+
+1. preferred model if available
+2. inherit / harness default
+3. first configured available Cursor-native family
+4. degraded report; parent continues only when safe
+
+Never loop. Never hide a non-model failure by switching models.

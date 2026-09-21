@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "iaf": "discovered-from-iaf/VERSION",
+  "ecc": "discovered-from-package.json-at-runtime",
+  "capabilities": {
+    "projectInstructions": {
+      "claude": "official",
+      "cursor": "AGENTS.md + .cursor/rules",
+      "codex": "AGENTS.md + plugin",
+      "gemini": ".gemini/GEMINI.md + IAF overlay",
+      "antigravity": ".agents + IAF overlay"
+    },
+    "automaticDelegation": {
+      "claude": "native",
+      "cursor": "parent-agent-task",
+      "codex": "limited-by-harness",
+      "gemini": "not-supported-as-claude-task",
+      "antigravity": "adapter-dependent"
+    },
+    "modelFallback": {
+      "claude": "preserve-upstream",
+      "cursor": "iaf-inherit-then-native-family",
+      "codex": "harness-default",
+      "gemini": "harness-default",
+      "antigravity": "backend-default"
+    }
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "classification": "IAF_FLEET_DATA",
+  "version": 1,
+  "owner": "operator",
+  "notGenericCore": true,
+  "notes": "OPERATOR/FLEET DATA — not IAF generic core. Path hints are environment-specific discovery aids. Do not invent missing checkouts or deploys. Adding a repository means adding an entry here or passing --repo /path, not editing iaf/lib. liveExpected is an operator assertion: yes = this checkout is the live application document root; no = not live / clone-only.",
+  "projects": [
+    {
+      "id": "wip",
+      "github": "Iaf-Software/wip",
+      "canonicalBranch": "feature/wip-initial-build",
+      "liveExpected": "no",
+      "pathHints": ["/home/innovedge/repositories/wip"]
+    },
+    {
+      "id": "ancc",
+      "github": "Iaf-Software/ancc",
+      "canonicalBranch": "master",
+      "liveExpected": "yes",
+      "pathHints": ["/home/innovedge/anccsrl.demoinnovedge.it"]
+    },
+    {
+      "id": "temasuite",
+      "github": "Iaf-Software/temasuite",
+      "canonicalBranch": "master",
+      "liveExpected": "yes",
+      "pathHints": ["/home/innovedge/temasuite.demoinnovedge.it"]
+    },
+    {
+      "id": "optibuild",
+      "github": "Iaf-Software/optibuild",
+      "canonicalBranch": "main",
+      "liveExpected": "yes",
+      "pathHints": ["/home/innovedge/optibuild.demoinnovedge.it"]
+    },
+    {
+      "id": "optibuildsaas",
+      "github": "Iaf-Software/optibuildsaas",
+      "canonicalBranch": "main",
+      "liveExpected": "yes",
+      "pathHints": ["/home/innovedge/remaoptibuild.demoinnovedge.it"]
+    },
+    {
+      "id": "mielepiu",
+      "github": "Iaf-Software/mielepiu",
+      "canonicalBranch": "master",
+      "liveExpected": "yes",
+      "pathHints": ["/home/innovedge/mielepiu.demoinnovedge.it"]
+    },
+    {
+      "id": "bekeen",
+      "github": "Iaf-Software/bekeen",
+      "canonicalBranch": "main",
+      "liveExpected": "yes",
+      "pathHints": ["/home/innovedge/public_html/bekeen.demoinnovedge.it"]
+    },
+    {
+      "id": "iaf-omnipos",
+      "github": "Iaf-Software/iaf-omnipos",
+      "canonicalBranch": "main",
+      "liveExpected": "no",
+      "noInventedServerDeploy": true,
+      "pathHints": [
+        "/Users/kekkoiaf/Dev/iaf-omnipos-wt-canonical-main",
+        "/Users/kekkoiaf/Dev/iaf-omnipos",
+        "/home/innovedge/repositories/ecc-worktrees-20260920/iaf-omnipos"
+      ]
+    }
+  ]
+}

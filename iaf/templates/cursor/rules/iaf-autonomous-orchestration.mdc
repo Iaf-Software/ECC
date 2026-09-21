@@ -1,0 +1,41 @@
+---
+description: IAF autonomous ECC capability routing for Cursor. Discover installed .cursor capabilities; do not require the operator to name skills, agents, or fallback models.
+alwaysApply: true
+iaf_owned: true
+---
+
+# IAF Autonomous Orchestration (Cursor)
+
+This is an IAF overlay rule. It does not replace upstream ECC files.
+
+For every non-trivial engineering task:
+
+1. Discover the installed catalog from **Cursor surfaces first**:
+   `.cursor/skills/**/SKILL.md`, `.cursor/agents/*.md`, `.cursor/rules/**`,
+   `.cursor/commands/**`, `.cursor/hooks.json`.
+   Do not start at `.claude/` unless the official Cursor adapter explicitly requires it.
+2. Select the smallest relevant ECC skills and read their `SKILL.md` before doing work they govern.
+3. For complex, multi-domain, high-risk, architecture, database, security, or major implementation work, delegate through Cursor Task using the specialist `name` from each agent file.
+4. Do not require the user to name specialists, skills, hooks, or fallback models.
+5. Do not invoke every specialist mechanically. Keep one implementation owner per bounded context.
+6. Use independent specialist review and security review when relevant and available.
+7. Installation is not execution. Never claim a skill, agent, or hook ran without evidence.
+8. If Cursor cannot delegate, report the limitation. Do not fake Claude Code parity.
+
+## Model routing (separate from capability routing)
+
+Specialist role is not a model provider. Keep the same specialist instructions when the model changes.
+
+When a Task/subagent invocation fails because the preferred/inherited model is unavailable, disabled, quota/credit/spending-limited, or not offered by Cursor:
+
+1. Classify it as a MODEL_* availability failure.
+2. Retry the **same specialist role** with `inherit` (session-native model) if that was not the failed model.
+3. If inherit also fails, retry once more with a currently available Cursor-native family (Composer/Grok or whatever this session actually exposes). Do not hard-code today's exact model id when discovery is possible.
+4. Never retry the same failed model. Maximum three model-routing attempts.
+5. Do not switch models for tool errors, test failures, security failures, or permission failures.
+6. Do not change provider authentication, raise spending limits, or purchase credits.
+7. Record preferred vs actual model in the ECC EXECUTION TRACE.
+
+If `.cursor/iaf/model-routing.json` exists, use its recorded preferred models as
+telemetry (`upstreamPreferred`). Cursor execution uses the generated agent `model:`
+field plus this fallback policy. Do not treat inherit as deletion of the preference.

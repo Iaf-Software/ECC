@@ -1,0 +1,47 @@
+'use strict';
+
+const path = require('path');
+const { loadPolicy } = require('./paths');
+
+function classifySecretHit(filePath, line, policy = loadPolicy('secret-scanner-compat.json')) {
+  const rel = String(filePath || '').replace(/\\/g, '/');
+  const text = String(line || '');
+  for (const fingerprint of policy.detectorFingerprints || []) {
+    if (!rel.endsWith(fingerprint.pathSuffix) && !rel.includes(`/${fingerprint.pathSuffix}`)) {
+      continue;
+    }
+    if (text.includes(fingerprint.mustContain) || rel.endsWith(path.basename(fingerprint.pathSuffix))) {
+      return fingerprint.class;
+    }
+  }
+  const quotedAssignment = /(api[_-]?key|secret|password|token)\s*[:=]\s*['"][^'"]{8,}/i.test(text);
+  const unquotedAssignment = /(api[_-]?key|secret|password|token)\s*[:=]\s*[^\s'"]{8,}/i.test(text);
+  const liveToken = /\b(sk-[a-zA-Z0-9]{20,}|ghp_[a-zA-Z0-9]{20,})\b/.test(text)
+    && !/sk-\[a-zA-Z0-9/.test(text)
+    && !/sk-abc123/.test(text);
+  if (/\.env$/.test(rel) || quotedAssignment || unquotedAssignment || liveToken) {
+    if (/change-me|example|abc123|not-for-production|AAAA/.test(text) && !liveToken) {
+      return 'TEST_FIXTURE';
+    }
+    return 'REAL_SECRET';
+  }
+  return 'UNKNOWN';
+}
+
+function shouldAllowlist(filePath, line) {
+  const classified = classifySecretHit(filePath, line);
+  return {
+    class: classified,
+    allow: classified === 'SECURITY_DETECTION_REGEX' || classified === 'GENERATED_ECC_SECURITY_RULE' || classified === 'TEST_FIXTURE',
+  };
+}
+
+function formatAllowlistEntry(filePath, substring) {
+  return `${filePath}\t${substring}`;
+}
+
+module.exports = {
+  classifySecretHit,
+  shouldAllowlist,
+  formatAllowlistEntry,
+};

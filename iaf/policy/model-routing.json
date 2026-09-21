@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "owner": "IAF",
+  "purpose": "Harness-aware specialist model resolution. Specialist role is not a model provider.",
+  "whyUpstreamInsufficient": "Upstream ECC agent frontmatter uses Claude aliases (sonnet/opus/haiku). Cursor maps those to Other Models and can fail on spending/quota without retrying the same specialist on a harness-native model.",
+  "maxAttempts": 3,
+  "never": [
+    "change_provider_authentication",
+    "increase_spending_limits",
+    "purchase_credits",
+    "install_unauthorized_provider",
+    "retry_non_model_failures",
+    "retry_the_same_failed_model",
+    "rewrite_upstream_agent_sources"
+  ],
+  "failureClasses": {
+    "modelAvailability": [
+      "MODEL_NOT_FOUND",
+      "MODEL_NOT_SUPPORTED_BY_HARNESS",
+      "MODEL_PROVIDER_DISABLED",
+      "MODEL_QUOTA_EXHAUSTED",
+      "MODEL_CREDIT_LIMIT",
+      "MODEL_SPENDING_LIMIT",
+      "MODEL_AUTH_REQUIRED",
+      "MODEL_TEMPORARILY_UNAVAILABLE",
+      "MODEL_RATE_LIMIT",
+      "MODEL_INVOCATION_FAILED_OTHER"
+    ],
+    "nonModel": [
+      "SPECIALIST_FAILED_FOR_NON_MODEL_REASON"
+    ]
+  },
+  "claudeAliases": [
+    "sonnet",
+    "opus",
+    "haiku",
+    "claude",
+    "claude-sonnet",
+    "claude-opus",
+    "claude-haiku",
+    "claude-3.5-sonnet",
+    "claude-3.7-sonnet",
+    "claude-4-sonnet",
+    "claude-4-opus",
+    "claude-4.5-sonnet",
+    "claude-4.6-sonnet"
+  ],
+  "harnesses": {
+    "claude": {
+      "strategy": "preserve-upstream",
+      "transformGeneratedAgents": false,
+      "preferUpstreamFallback": true,
+      "notes": "Claude Code is the ECC reference. Do not normalize it to other harnesses."
+    },
+    "cursor": {
+      "strategy": "preferred-if-usable-else-inherit",
+      "transformGeneratedAgents": true,
+      "keepPreferredInSidecar": true,
+      "installTimeDefaultWhenPreferredUnusable": "inherit",
+      "nativeFallbackTokens": ["inherit", "cursor-native", "composer", "grok"],
+      "discoverAvailableModels": true,
+      "hardcodeExactModelIds": false,
+      "notes": "Use inherit / currently available Cursor-native models. Do not permanently pin today's Grok/Composer identifier."
+    },
+    "codex": {
+      "strategy": "harness-default",
+      "transformGeneratedAgents": false,
+      "rejectForeignFamilies": ["claude", "sonnet", "opus", "haiku", "cursor", "composer", "grok", "gemini", "antigravity"],
+      "useNativeDefault": true,
+      "notes": "Stay inside OpenAI Codex-supported models. Do not send Claude/Cursor/Antigravity IDs."
+    },
+    "gemini": {
+      "strategy": "harness-default",
+      "transformGeneratedAgents": false,
+      "rejectForeignFamilies": ["claude", "sonnet", "opus", "haiku", "cursor", "composer", "grok", "codex", "gpt"],
+      "useNativeDefault": true,
+      "notes": "Stay inside Gemini-supported models. Prefer native/default routing."
+    },
+    "antigravity": {
+      "strategy": "backend-default",
+      "transformGeneratedAgents": false,
+      "injectModelIds": false,
+      "useNativeDefault": true,
+      "notes": "Preserve Antigravity backend model selection. Do not inject foreign model IDs."
+    }
+  }
+}
