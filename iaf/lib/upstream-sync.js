@@ -40,14 +40,19 @@ function previewUpstream() {
   };
 }
 
-function detectIafOverlap(localSha, upstreamSha) {
-  const changed = runGit(['diff', '--name-only', `${localSha}...${upstreamSha}`]);
-  const files = changed.stdout ? changed.stdout.split('\n').filter(Boolean) : [];
-  const iafOwned = files.filter(file => file === 'iaf' || file.startsWith('iaf/'));
+function classifyChangedFiles(files) {
+  const list = Array.isArray(files) ? files : [];
+  const iafOwned = list.filter(file => file === 'iaf' || file.startsWith('iaf/'));
   return {
     upstreamTouchedIafTree: iafOwned,
     safe: iafOwned.length === 0,
   };
+}
+
+function detectIafOverlap(localSha, upstreamSha) {
+  const changed = runGit(['diff', '--name-only', `${localSha}...${upstreamSha}`]);
+  const files = changed.stdout ? changed.stdout.split('\n').filter(Boolean) : [];
+  return classifyChangedFiles(files);
 }
 
 function detectRetirableWorkarounds(sourceRoot = eccRoot()) {
@@ -96,4 +101,5 @@ module.exports = {
   applyUpstream,
   detectIafOverlap,
   detectRetirableWorkarounds,
+  classifyChangedFiles,
 };

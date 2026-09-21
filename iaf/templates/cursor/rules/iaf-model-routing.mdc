@@ -12,7 +12,16 @@ Pipeline:
 
 TASK → select ECC specialist → determine preferred model → if usable, execute → else select the best currently available Cursor-compatible fallback → retry the same specialist → record evidence.
 
-Default generated Cursor agents use `inherit` when Claude aliases are not known to be usable, preserving the specialist prompt. If a preferred Claude model later becomes usable in this account, IAF adapt with `cursorUsePreferredModels` can restore it.
+Default generated Cursor agents keep `IAF_UPSTREAM_PREFERRED_MODEL` in frontmatter
+and sidecar metadata. `model: inherit` is the Cursor **execution** policy when a
+Claude alias is not known to be usable. It does not delete the upstream preference.
+
+If a preferred Claude model later becomes usable in this account, IAF adapt with
+`cursorUsePreferredModels` can restore the executable `model:` field.
+
+When Task invocation fails for a MODEL_* availability reason, the parent Agent must
+retry the **same specialist** automatically. The user must not be asked to name
+Grok, Composer, or any fallback model.
 
 Bounded fallback:
 

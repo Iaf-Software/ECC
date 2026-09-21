@@ -13,6 +13,7 @@ const {
 } = require('./overlay');
 const { buildProvenance, writeProvenance } = require('./provenance');
 const { discoverProjectContext } = require('./project-context');
+const { repairProjectInstallState } = require('./install-state-repair');
 
 const PRESERVE_NAMES = new Set([
   'AGENTS.md',
@@ -106,6 +107,8 @@ function adaptRepo(options) {
         ok: true,
         skippedOfficial: true,
         reason: 'overlay-only',
+        overlayOnly: true,
+        overlayMode: 'TEMPORARY_DEGRADED',
       });
       continue;
     }
@@ -117,13 +120,57 @@ function adaptRepo(options) {
       hooks: target === 'cursor' && !hookDecision.skip,
     });
     if (!installed.ok && isInstallStateTargetMismatch(installed)) {
+      if (options.overlayOnly) {
+        results.push({
+          ...installed,
+          ok: true,
+          skippedOfficial: true,
+          reason: 'overlay-only',
+          overlayOnly: true,
+          overlayMode: 'TEMPORARY_DEGRADED',
+          adapterPresent: hasExistingAdapter(projectRoot, target),
+        });
+        continue;
+      }
+      const repaired = repairProjectInstallState({
+        projectRoot,
+        dryRun: false,
+      });
+      if (repaired.ok && repaired.results.some(item => item.applied)) {
+        const retried = officialInstall({
+          target,
+          projectRoot,
+          profile,
+          dryRun: false,
+          hooks: target === 'cursor' && !hookDecision.skip,
+        });
+        results.push({
+          ...retried,
+          installStateRepaired: true,
+          overlayMode: retried.ok ? 'OFFICIAL_PLUS_IAF' : 'TEMPORARY_DEGRADED',
+        });
+        if (!retried.ok) {
+          return {
+            ok: false,
+            project: info,
+            failedTarget: target,
+            results,
+            installStateRepair: repaired,
+          };
+        }
+        continue;
+      }
       results.push({
         ...installed,
         ok: true,
         skippedOfficial: true,
         reason: 'install-state-target-mismatch',
         overlayOnly: true,
+        overlayMode: repaired.results.some(item => item.status === 'REFUSED')
+          ? 'BLOCKED_BY_STALE_INSTALL_STATE'
+          : 'TEMPORARY_DEGRADED',
         adapterPresent: hasExistingAdapter(projectRoot, target),
+        installStateRepair: repaired,
       });
       continue;
     }
@@ -158,6 +205,14 @@ function adaptRepo(options) {
   });
   writeProvenance(projectRoot, provenance);
 
+  const overlayMode = options.overlayOnly
+    ? 'TEMPORARY_DEGRADED'
+    : (results.some(item => item.overlayMode === 'BLOCKED_BY_STALE_INSTALL_STATE')
+      ? 'BLOCKED_BY_STALE_INSTALL_STATE'
+      : (results.some(item => item.overlayOnly || item.skippedOfficial)
+        ? 'TEMPORARY_DEGRADED'
+        : 'OFFICIAL_PLUS_IAF'));
+
   return {
     ok: results.every(item => item.ok),
     project: info,
@@ -165,7 +220,8 @@ function adaptRepo(options) {
     hooks: hookDecision,
     results,
     overlay,
-    overlayOnly: Boolean(options.overlayOnly || results.some(item => item.overlayOnly || item.skippedOfficial)),
+    overlayOnly: overlayMode !== 'OFFICIAL_PLUS_IAF',
+    overlayMode,
     provenancePath: path.join(projectRoot, '.iaf-ecc-state.json'),
     projectContext,
     preserved: [...PRESERVE_NAMES].filter(name => fs.existsSync(path.join(projectRoot, name))),

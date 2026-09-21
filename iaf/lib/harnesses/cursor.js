@@ -54,7 +54,10 @@ function applyAgentModelTransform(projectRoot, context = {}) {
     if (result.preferred) {
       sidecar[path.basename(filePath)] = {
         preferred: result.preferred,
+        upstreamPreferred: result.preferred,
         actual: result.actual || result.preferred,
+        cursorExecutionModelPolicy: result.actual || result.preferred,
+        whyStaticPreferredUnsafe: 'Cursor maps Claude aliases to Other Models unless the account exposes them as usable. inherit is the execution compatibility mechanism; preference is preserved here.',
       };
     }
   }
@@ -68,27 +71,13 @@ function applyAgentModelTransform(projectRoot, context = {}) {
 }
 
 function detectHookCollision(projectRoot) {
-  const hooksJson = path.join(projectRoot, '.cursor', 'hooks.json');
-  if (!fs.existsSync(hooksJson)) {
-    return { collision: false, existing: [] };
-  }
-  const parsed = JSON.parse(fs.readFileSync(hooksJson, 'utf8'));
-  const existing = [];
-  const events = parsed.hooks || parsed;
-  if (events && typeof events === 'object') {
-    for (const [eventName, entries] of Object.entries(events)) {
-      if (!Array.isArray(entries)) {
-        continue;
-      }
-      for (const entry of entries) {
-        const command = String(entry.command || '');
-        if (command && !command.includes('.cursor/hooks/') && !command.includes('.cursor/scripts/hooks/')) {
-          existing.push({ event: eventName, command });
-        }
-      }
-    }
-  }
-  return { collision: existing.length > 0, existing };
+  const { analyzeHooks } = require('../hook-compat');
+  const analysis = analyzeHooks(projectRoot);
+  return {
+    collision: analysis.collision,
+    existing: analysis.conflicting,
+    analysis,
+  };
 }
 
 module.exports = {

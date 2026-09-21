@@ -21,23 +21,22 @@ function describeHost() {
 
 function appearsLiveCheckout(repoPath, inventoryEntry = {}) {
   if (inventoryEntry.liveExpected === 'yes') {
-    return 'configured-yes';
+    return 'YES';
   }
   if (inventoryEntry.liveExpected === 'no') {
-    return 'configured-no';
+    return 'NO';
   }
   const resolved = path.resolve(repoPath);
   const markers = [
-    path.join(resolved, 'public'),
+    path.join(resolved, 'public', 'index.php'),
     path.join(resolved, 'public_html'),
     path.join(resolved, 'index.php'),
     path.join(resolved, 'artisan'),
   ];
-  const hasWebMarker = markers.some(marker => fs.existsSync(marker));
-  if (hasWebMarker && inventoryEntry.liveExpected === 'maybe') {
-    return 'heuristic-maybe';
+  if (markers.some(marker => fs.existsSync(marker))) {
+    return 'YES';
   }
-  return 'unknown';
+  return 'UNKNOWN';
 }
 
 module.exports = {

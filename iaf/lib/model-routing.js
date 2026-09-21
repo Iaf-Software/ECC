@@ -317,7 +317,10 @@ function transformCursorAgentFrontmatter(source, context = {}) {
   }
   const nextFront = front.replace(/^model:\s*.+$/m, [
     `model: ${nextModel}`,
+    `# IAF_UPSTREAM_PREFERRED_MODEL: ${preferred}`,
     `# IAF_PREFERRED_MODEL: ${preferred}`,
+    `# IAF_CURSOR_EXECUTION_MODEL_POLICY: ${nextModel}`,
+    '# IAF: inherit is Cursor execution compatibility when the preferred Claude alias is not known usable.',
     '# IAF: specialist role is unchanged. Preferred model is recorded, not hard-deleted.',
   ].join('\n'));
   const content = source.replace(match[0], `---\n${nextFront}\n---`);

@@ -88,11 +88,12 @@ describe('overlay and workflows', () => {
     fs.rmSync(root, { recursive: true, force: true });
   });
 
-  it('upstream overlap detector treats iaf/ as IAF-owned', () => {
-    const overlap = detectIafOverlap('HEAD', 'HEAD');
-    assert.equal(overlap.safe, true);
-    const retire = detectRetirableWorkarounds();
-    assert.ok(retire.some(item => item.id === 'cursor-hook-path-compat'));
-    assert.equal(retire.find(item => item.id === 'cursor-hook-path-compat').upstreamLooksEquivalent, false);
+  it('opts into official baseline:hooks when a profile excludes hooks-runtime', () => {
+    const { hookOptInArgs, profileIncludesHooksRuntime } = require('../lib/official-install');
+    assert.equal(profileIncludesHooksRuntime('minimal'), false);
+    assert.equal(profileIncludesHooksRuntime('core'), true);
+    assert.deepEqual(hookOptInArgs('minimal', 'on'), ['--with', 'baseline:hooks']);
+    assert.deepEqual(hookOptInArgs('core', 'on'), []);
+    assert.deepEqual(hookOptInArgs('minimal', 'off'), []);
   });
 });

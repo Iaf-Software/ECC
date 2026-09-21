@@ -14,8 +14,13 @@ function classifySecretHit(filePath, line, policy = loadPolicy('secret-scanner-c
       return fingerprint.class;
     }
   }
-  if (/\.env$/.test(rel) || /(api[_-]?key|secret|password|token)\s*[:=]\s*['\"][^'\"]{8,}/i.test(text)) {
-    if (/change-me|example|abc123|not-for-production|AAAA/.test(text)) {
+  const quotedAssignment = /(api[_-]?key|secret|password|token)\s*[:=]\s*['"][^'"]{8,}/i.test(text);
+  const unquotedAssignment = /(api[_-]?key|secret|password|token)\s*[:=]\s*[^\s'"]{8,}/i.test(text);
+  const liveToken = /\b(sk-[a-zA-Z0-9]{20,}|ghp_[a-zA-Z0-9]{20,})\b/.test(text)
+    && !/sk-\[a-zA-Z0-9/.test(text)
+    && !/sk-abc123/.test(text);
+  if (/\.env$/.test(rel) || quotedAssignment || unquotedAssignment || liveToken) {
+    if (/change-me|example|abc123|not-for-production|AAAA/.test(text) && !liveToken) {
       return 'TEST_FIXTURE';
     }
     return 'REAL_SECRET';

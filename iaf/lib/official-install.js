@@ -8,6 +8,28 @@ const { eccRoot } = require('./paths');
 const PROJECT_TARGETS = ['cursor', 'claude-project', 'gemini', 'antigravity'];
 const HOME_TARGETS = ['claude', 'codex'];
 
+function profileIncludesHooksRuntime(profile, root = eccRoot()) {
+  const filePath = path.join(root, 'manifests', 'install-profiles.json');
+  if (!fs.existsSync(filePath)) {
+    return false;
+  }
+  const profiles = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  const modules = (((profiles.profiles || {})[profile] || {}).modules) || [];
+  return modules.includes('hooks-runtime');
+}
+
+function hookOptInArgs(profile, hooks) {
+  if (hooks === false || hooks === 'off') {
+    return [];
+  }
+  if (hooks === true || hooks === 'on') {
+    if (!profileIncludesHooksRuntime(profile || 'developer')) {
+      return ['--with', 'baseline:hooks'];
+    }
+  }
+  return [];
+}
+
 function resolveNodeModules(root) {
   const local = path.join(root, 'node_modules');
   if (fs.existsSync(path.join(local, 'sql.js')) || fs.existsSync(local)) {
@@ -42,6 +64,7 @@ function officialInstall({ target, projectRoot, profile, dryRun, hooks, extraArg
   } else if (hooks === true || hooks === 'on') {
     args.push('--enable-hooks');
   }
+  args.push(...hookOptInArgs(profile, hooks));
   args.push(...extraArgs);
 
   const nodeModules = resolveNodeModules(root);
@@ -81,4 +104,6 @@ module.exports = {
   resolveNodeModules,
   PROJECT_TARGETS,
   HOME_TARGETS,
+  profileIncludesHooksRuntime,
+  hookOptInArgs,
 };

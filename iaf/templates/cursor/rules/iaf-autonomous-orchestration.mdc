@@ -36,4 +36,6 @@ When a Task/subagent invocation fails because the preferred/inherited model is u
 6. Do not change provider authentication, raise spending limits, or purchase credits.
 7. Record preferred vs actual model in the ECC EXECUTION TRACE.
 
-If `.cursor/iaf/model-routing.json` exists, use its recorded preferred models as telemetry only; Cursor execution should use the generated agent `model:` field plus this fallback policy.
+If `.cursor/iaf/model-routing.json` exists, use its recorded preferred models as
+telemetry (`upstreamPreferred`). Cursor execution uses the generated agent `model:`
+field plus this fallback policy. Do not treat inherit as deletion of the preference.

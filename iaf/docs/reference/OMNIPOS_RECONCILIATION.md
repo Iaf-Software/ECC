@@ -1,30 +1,39 @@
-# OmniPOS PR #18 reconciliation
+# OmniPOS PR #18 / #19 reconciliation
 
-Prototype: https://github.com/Iaf-Software/iaf-omnipos/pull/18
+Prototype #18: https://github.com/Iaf-Software/iaf-omnipos/pull/18
 Branch: `chore/ecc-cursor-autonomous-orchestration`
 Commit: `a43a1be0ffd9f6784f9088e1376ce4573030fbc3`
-Status: OPEN, not merged by this control-plane work.
+Status: OPEN, **SUPERSEDED as fleet architecture**. Not merged.
 
-## Classification
+Managed #19: https://github.com/Iaf-Software/iaf-omnipos/pull/19
+Branch: `chore/iaf-ecc-overlay`
+Status: OPEN, **READY_TO_MERGE after IAF ECC PR #1**. Not auto-merged.
 
-| Prototype change | Belongs |
+## #18 classification
+
+| Prototype change | Class |
 | --- | --- |
-| Official Cursor `hooks-runtime` | Official ECC installer (`--enable-hooks`) |
-| Project alwaysApply orchestration rule | IAF overlay template (generic, not OmniPOS-branded) |
-| `scripts/hooks` and `scripts/lib` repo-root symlinks | IAF generic hook-path rewrite; do **not** copy symlinks into every consumer |
-| Secret-scanner allowlist of ECC detector regexes | IAF secret-scanner compatibility policy; project scanners keep their own files |
-| Empty `.cursor/mcp.json` | IAF MCP policy (optional off) |
-| OmniPOS-specific secret false positives (VARIANT_TOKEN_PATTERN, test PEMs) | OmniPOS project-specific; keep there |
+| Official Cursor `hooks-runtime` | NOW_GENERIC_IN_IAF_ECC (official installer `--enable-hooks` + `--with baseline:hooks` when profile omits it) |
+| Project alwaysApply orchestration rule | NOW_GENERIC_IN_IAF_ECC |
+| `scripts/hooks` and `scripts/lib` repo-root symlinks | OBSOLETE / SUPERSEDED by IAF generated-copy path rewrite |
+| Secret-scanner allowlist of ECC detector regexes | NOW_GENERIC_IN_IAF_ECC (classify, do not globally ignore `.cursor/`) |
+| Empty `.cursor/mcp.json` | NOW_GENERIC_IN_IAF_ECC default policy (capability preserved) |
+| OmniPOS-specific secret false positives (VARIANT_TOKEN_PATTERN, test PEMs) | STILL_OMNIPOS_SPECIFIC — keep in the consumer repo |
+| Cursor autonomous orchestration copy that assumes Claude paths | SUPERSEDED |
+| Mac-only live hook permission click-through | NEEDS_MANUAL_MAC_VALIDATION |
 
-## Generic fixes now in IAF ECC
+## #19 classification
 
-- Cursor hook `require('../../scripts/...')` → `.cursor`-relative rewrite
-- Cursor generated `model: sonnet` → `inherit` plus preferred sidecar
-- Catalog-driven orchestration contract
-- Harness-first skill paths
+| Change | Class |
+| --- | --- |
+| IAF overlay rules + provenance | GENERATED_PROJECT_CONFIG from IAF_GENERIC_CORE |
+| Cursor agent `inherit` + `IAF_UPSTREAM_PREFERRED_MODEL` | GENERATED_PROJECT_CONFIG |
+| Official install-state rebind/update + hooks-runtime | ECC_MANAGED |
+| Application source | none |
 
-## Do not
+## Plan
 
-- Merge PR 18 as the fleet template
-- Create an OmniPOS live checkout on rive04
-- Copy OmniPOS application memory into other repositories
+1. Review/merge Iaf-Software/ECC PR #1.
+2. Review/merge OmniPOS #19 as the managed successor.
+3. Leave #18 open until Francesco confirms no unique OmniPOS scanner/false-positive file is missing from `main` or #19, then close #18 as superseded.
+4. Do not copy OmniPOS application memory into IAF ECC.

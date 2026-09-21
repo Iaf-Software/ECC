@@ -33,6 +33,7 @@ Commands:
   inventory --repo <path>
   upstream-preview
   upstream-apply --dry-run|--apply
+  repair-install-state --repo <path> [--dry-run|--apply]
   doctor --repo <path>
   smoke-model [--json]
   smoke-capability --harness <name>
@@ -157,11 +158,19 @@ function main(argv = process.argv.slice(2)) {
     case 'upstream-apply':
       printJson(applyUpstream({ dryRun: !options.apply, apply: Boolean(options.apply) }));
       return 0;
+    case 'repair-install-state': {
+      if (!options.repo) {
+        throw new Error('repair-install-state requires --repo <path>');
+      }
+      const { repairProjectInstallState } = require('./install-state-repair');
+      printJson(repairProjectInstallState({
+        projectRoot: options.repo,
+        dryRun: !options.apply,
+      }));
+      return 0;
+    }
     case 'doctor':
-      printJson({
-        inventory: classifyExisting(options.repo),
-        iafState: fs.existsSync(path.join(options.repo, '.iaf-ecc-state.json')),
-      });
+      printJson(require('./doctor').doctorRepo(options.repo));
       return 0;
     case 'smoke-model': {
       const cases = [
