@@ -55,6 +55,8 @@ function parseArgs(argv) {
       options.json = true;
     } else if (arg === '--dry-run') {
       options.dryRun = true;
+    } else if (arg === '--apply') {
+      options.apply = true;
     } else if (arg === '--overlay-only') {
       options.overlayOnly = true;
     } else if (arg === '--repo' || arg === '--harness' || arg === '--harnesses' || arg === '--hooks' || arg === '--profile' || arg === '--inventory') {
