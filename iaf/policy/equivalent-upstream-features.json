@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "owner": "IAF",
+  "purpose": "Detect when affaan-m/ECC implements a feature previously provided by IAF so the workaround can be retired.",
+  "features": [
+    {
+      "id": "cursor-hook-path-compat",
+      "iafModule": "iaf/lib/hook-compat.js",
+      "detect": [
+        "require('../scripts/lib/shell-split') in .cursor/hooks/before-shell-execution.js",
+        "getPluginRoot resolves to .cursor rather than repo root"
+      ],
+      "retireWhen": "Official Cursor adapter generated hooks resolve scripts relative to .cursor without project-root symlinks."
+    },
+    {
+      "id": "cursor-model-fallback",
+      "iafModule": "iaf/lib/model-routing.js",
+      "detect": [
+        "provider-aware model fallback in official Cursor adapter",
+        "generated agents no longer hard-require Claude aliases on Cursor"
+      ],
+      "retireWhen": "Official ECC Cursor adapter retries the same specialist on a harness-usable model after MODEL_* failures."
+    },
+    {
+      "id": "harness-aware-skill-paths",
+      "iafModule": "iaf/lib/skill-paths.js",
+      "detect": [
+        "official capability discovery starts from current harness surfaces"
+      ],
+      "retireWhen": "Official adapters no longer Claude-first path-resolve skills for Cursor/Codex/Gemini/Antigravity."
+    }
+  ]
+}

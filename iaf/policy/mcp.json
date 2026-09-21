@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "owner": "IAF",
+  "defaultOptional": "off",
+  "neverInsertCredentials": true,
+  "neverAuthenticateOnBehalfOfOperator": true,
+  "classification": {
+    "required": [],
+    "project_required": [],
+    "optional": ["chrome-devtools"],
+    "not_needed": [],
+    "auth_required": ["chrome-devtools"]
+  },
+  "notes": "MCP availability is not ECC orchestration availability. Do not enable optional MCP merely to make doctor green."
+}

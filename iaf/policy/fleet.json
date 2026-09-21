@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "owner": "IAF",
+  "notes": "Path hints are environment-specific discovery aids, not a requirement that every host contain every checkout. Do not invent missing checkouts or deploys.",
+  "projects": [
+    {
+      "id": "wip",
+      "github": "Iaf-Software/wip",
+      "canonicalBranch": "feature/wip-initial-build",
+      "liveExpected": "maybe",
+      "pathHints": ["/home/innovedge/repositories/wip"]
+    },
+    {
+      "id": "ancc",
+      "github": "Iaf-Software/ancc",
+      "canonicalBranch": "master",
+      "liveExpected": "maybe",
+      "pathHints": ["/home/innovedge/anccsrl.demoinnovedge.it"]
+    },
+    {
+      "id": "temasuite",
+      "github": "Iaf-Software/temasuite",
+      "canonicalBranch": "master",
+      "liveExpected": "maybe",
+      "pathHints": ["/home/innovedge/temasuite.demoinnovedge.it"]
+    },
+    {
+      "id": "optibuild",
+      "github": "Iaf-Software/optibuild",
+      "canonicalBranch": "main",
+      "liveExpected": "maybe",
+      "pathHints": ["/home/innovedge/optibuild.demoinnovedge.it"]
+    },
+    {
+      "id": "optibuildsaas",
+      "github": "Iaf-Software/optibuildsaas",
+      "canonicalBranch": "main",
+      "liveExpected": "maybe",
+      "pathHints": ["/home/innovedge/remaoptibuild.demoinnovedge.it"]
+    },
+    {
+      "id": "mielepiu",
+      "github": "Iaf-Software/mielepiu",
+      "canonicalBranch": "master",
+      "liveExpected": "maybe",
+      "pathHints": ["/home/innovedge/mielepiu.demoinnovedge.it"]
+    },
+    {
+      "id": "bekeen",
+      "github": "Iaf-Software/bekeen",
+      "canonicalBranch": "main",
+      "liveExpected": "maybe",
+      "pathHints": ["/home/innovedge/public_html/bekeen.demoinnovedge.it"]
+    },
+    {
+      "id": "iaf-omnipos",
+      "github": "Iaf-Software/iaf-omnipos",
+      "canonicalBranch": "main",
+      "liveExpected": "no",
+      "noInventedServerDeploy": true,
+      "pathHints": [
+        "/Users/kekkoiaf/Dev/iaf-omnipos-wt-canonical-main",
+        "/Users/kekkoiaf/Dev/iaf-omnipos",
+        "/home/innovedge/repositories/ecc-worktrees-20260920/iaf-omnipos"
+      ]
+    }
+  ]
+}
